@@ -10,4 +10,4 @@ jobs:
           directory: ~/repo
       - run:
           name: Test
-          command: dune runtest
+          command: source ~/.profile && dune runtest
