@@ -10,6 +10,9 @@ RUN git checkout c23c1a7071910f235d5bc173cbadb97cd450e9fb
 RUN cd -
 
 RUN opam update
+ADD more-ocaml.opam.locked more-ocaml.opam.locked
 ADD more-ocaml.opam more-ocaml.opam
 RUN opam install . --deps-only --with-test --locked
-RUN rm more-ocaml.opam
+RUN rm more-ocaml.opam more-ocaml.opam.locked
+
+RUN sudo apt-get install fswatch
