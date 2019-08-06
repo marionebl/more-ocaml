@@ -15,4 +15,4 @@ ADD more-ocaml.opam more-ocaml.opam
 RUN opam install . --deps-only --with-test --locked
 RUN rm more-ocaml.opam more-ocaml.opam.locked
 
-RUN sudo apt-get install fswatch
+RUN sudo apt-get install fswatch -y
