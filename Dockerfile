@@ -11,5 +11,5 @@ RUN cd -
 
 RUN opam update
 ADD more-ocaml.opam more-ocaml.opam
-RUN opam install . --deps-only
+RUN opam install . --deps-only --with-test --locked
 RUN rm more-ocaml.opam
