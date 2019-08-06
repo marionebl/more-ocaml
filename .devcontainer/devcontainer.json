@@ -2,7 +2,7 @@
     "name": "ocaml",
     "dockerFile": "../Dockerfile",
     "extensions": [
-        "freebroccolo.reasonml",
+        "jaredly.reason-vscode",
         "maelvalais.dune",
         "hackwaly.ocaml-debugger",
         "editorconfig.editorconfig",
