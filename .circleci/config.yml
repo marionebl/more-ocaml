@@ -6,6 +6,12 @@ jobs:
       - image: marionebl/more-ocaml
     working_directory: /repo
     steps:
+      - run:
+          name: Create workspace
+          command: sudo mkdir -p /repo
+      - run:
+          name: Set workspace permissions
+          command: sudo chown -R opam:opam /repo
       - checkout
       - run:
           name: Test
