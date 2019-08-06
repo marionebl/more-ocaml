@@ -1,0 +1,13 @@
+opam-version: "2.0"
+name: "more-ocaml"
+maintainer: "Mario Nebl <hello@mario-nebl.de>"
+authors: "Mario Nebl <hello@mario-nebl.de>"
+homepage: "https://github.com/marionebl/more-ocaml"
+bug-reports: "https://github.com/marionebl/more-ocaml/issues"
+version: "0.1"
+synopsis: "Solutions for questions in More OCaml"
+depends: [
+    "base" {= "v0.12.2"}
+    "ounit" {= "2.0.8"}
+    "ppx_inline_test" {= "v0.12.0"}
+]
