@@ -1,3 +1,5 @@
+open Types
+
 (* The List module in Ocaml's Standard Library defines two intriguingly-named functions over lists: *)
 let rec fold_left f a l =
     match l with
@@ -27,3 +29,51 @@ let append x y =
    given a list of pairs, yields a pair of lists: *)
 let split l =
     fold_right (fun (x, y) (xs, ys) -> (x :: xs, y :: ys)) l ([], [])
+
+(* A word of caution: accumulator functions should be efficient *)
+let concat l = fold_left (@) [] l
+
+(* For a binary tree, we can define a fold with two accumulators, one for left, one for right sub-trees.
+   f combines them into a new accumulator. *)
+let rec fold_tree f e t =
+    match t with
+    | Lf -> e
+    | Br (x, l, r) -> f x (fold_tree f e l) (fold_tree f e r)
+
+let tree_size t =
+    fold_tree (fun _ l r -> 1 + l + r) 0 t
+
+let%test_unit _ =
+    let open OUnit2 in
+    let open Test_data in
+    assert_equal 4 (tree_size tree_basic) ~printer:string_of_int
+
+let tree_sum t =
+    fold_tree (fun x l r -> x + l + r) 0 t
+
+let%test_unit _ =
+    let open OUnit2 in
+    let open Test_data in
+    assert_equal 11 (tree_sum tree_basic) ~printer:string_of_int
+
+(* standard tree traversals can be written easily with a list accumulator *)
+let tree_preorder t = fold_tree (fun x l r -> [x] @ l @ r) [] t
+
+let%test_unit _ =
+    let open OUnit2 in
+    let open Test_data in
+    assert_equal [1; 0; 6; 4] (tree_preorder tree_basic) ~printer:(print_list ~f:string_of_int)
+
+let tree_inorder t = fold_tree (fun x l r -> l @ [x] @ r) [] t
+
+let%test_unit _ =
+    let open OUnit2 in
+    let open Test_data in
+    assert_equal [0; 1; 4; 6] (tree_inorder tree_basic) ~printer:(print_list ~f:string_of_int)
+
+let tree_postorder t = fold_tree (fun x l r -> l @ r @ [x]) [] t
+
+let%test_unit _ =
+    let open OUnit2 in
+    let open Test_data in
+    assert_equal [0; 4; 6; 1] (tree_postorder tree_basic) ~printer:(print_list ~f:string_of_int)
