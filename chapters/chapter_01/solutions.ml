@@ -77,3 +77,45 @@ let%test_unit _ =
     let open OUnit2 in
     let open Test_data in
     assert_equal [0; 4; 6; 1] (tree_postorder tree_basic) ~printer:(print_list ~f:string_of_int)
+
+(* 1. Write a function which, given a list of integers representing expenses, removes them from a budget,
+   again represented by an integer. *)
+let spend e b = fold_left (-) b e
+
+let%test_unit _ =
+    let open OUnit2 in
+    assert_equal 0 (spend [0; 0; 0] 0);
+    assert_equal 1 (spend [1; 2; 3] 7)
+
+(* 2. Calculate the length of a list using one of the fold functions *)
+let length l = fold_left (fun a _ -> a + 1) 0 l
+
+let%test_unit _ =
+    let open OUnit2 in
+    assert_equal 3 (length [0; 0; 0]);
+    assert_equal 0 (length []);
+    assert_equal 1 (length ['a'])
+
+(* 3. Use one of the fold functionsto find the last element of a list, if any. Behave sensibly if the list is
+   empty. *)
+let either b a = match a with Some _ -> a | None -> Some b
+
+let last l = 
+ fold_right either l None
+
+ let%test_unit _ =
+    let open OUnit2 in
+    assert_equal None (last []);
+    assert_equal (Some 1) (last [1]);
+    assert_equal (Some 0) (last [1; 0])
+
+(* 4. Write a function to reverse a list, using one of the fold functions *)
+let flip f a b = f b a
+let reverse l = fold_left (flip List.cons) [] l
+
+let%test_unit _ =
+    let open OUnit2 in
+    let open Test_data in
+    assert_equal [] (reverse []) ~printer:(print_list ~f:string_of_int);
+    assert_equal [0; 1; 2] (reverse [2; 1; 0]) ~printer:(print_list ~f:string_of_int);
+    assert_equal [0; 2; 1] (reverse [1; 2; 0]) ~printer:(print_list ~f:string_of_int);
