@@ -118,4 +118,22 @@ let%test_unit _ =
     let open Test_data in
     assert_equal [] (reverse []) ~printer:(print_list ~f:string_of_int);
     assert_equal [0; 1; 2] (reverse [2; 1; 0]) ~printer:(print_list ~f:string_of_int);
-    assert_equal [0; 2; 1] (reverse [1; 2; 0]) ~printer:(print_list ~f:string_of_int);
+    assert_equal [0; 2; 1] (reverse [1; 2; 0]) ~printer:(print_list ~f:string_of_int)
+
+(* 5. Write a version of List.mem using one of the fold functions. Now setify can be defined entirely using folds *)
+let mem e l = fold_left (fun a e' -> a || e' == e) false l
+let setify l = fold_right (fun e' a -> if mem e' a then a else e' :: a) l
+
+let%test_unit _ =
+    let open OUnit2 in
+    assert_equal true (mem 1 [1]);
+    assert_equal false (mem 0 [1])
+
+(* 6. Use a fold to write a function which, given a list of non-empty strings representing words, returns a
+   single string where the words are separated by spaces. Comment on its efficiency. *)
+let concat_words l = fold_left (fun (a, sep) w -> (a ^ sep ^ w, " ")) ("", "") l |> fst
+
+let%test_unit _ =
+    let open OUnit2 in
+    let open Base in
+    assert_equal "Hello World" (concat_words ["Hello"; "World"]) ~printer:Fn.id
