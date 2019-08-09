@@ -2,7 +2,7 @@
   (name solutions)
   (inline_tests)
   (preprocess (pps ppx_inline_test))
-  (libraries base oUnit))
+  (libraries base oUnit benchmark))
 
 (env
   (dev

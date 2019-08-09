@@ -137,3 +137,29 @@ let%test_unit _ =
     let open OUnit2 in
     let open Base in
     assert_equal "Hello World" (concat_words ["Hello"; "World"]) ~printer:Fn.id
+
+(* 7. Use fold_tree to write function which calculates the maximum depth of a tree. *)
+let max a b = if a >= b then a else b
+let max_depth t = fold_tree (fun _ l r -> 1 + max l r) 0 t
+
+let%test_unit _ =
+    let open OUnit2 in
+    let open Test_data in
+    assert_equal 3 (max_depth tree_basic);
+    assert_equal 0 (max_depth tree_empty);
+    assert_equal 4 (max_depth tree_imbalanced)
+
+(* 8. Compare the time efficiency of one ore more of the functions with the system implementation
+   of the same function. (for example our fold-based member function vs List.mem) with regard to both
+   computational complexity and actual time taken *)
+
+(* length
+   - fold_left length takes linear time O(n) 
+   - system: linear time O(n) 
+     https://github.com/ocaml/ocaml/blob/6a6f34e48306d573bf3036681cb304ed84415957/stdlib/list.ml#L21-L25 
+   - according to benchmarks system is 3 times faster *)
+let%test_unit _ =
+    let open Test_data in
+    let open Benchmark in
+    ignore (latency1 ~name:"fold_left length" 1000000L length list_basic);
+    ignore (latency1 ~name:"List.length" 1000000L List.length list_basic);
