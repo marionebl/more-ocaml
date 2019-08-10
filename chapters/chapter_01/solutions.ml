@@ -96,7 +96,7 @@ let%test_unit _ =
     assert_equal 0 (length []);
     assert_equal 1 (length ['a'])
 
-(* 3. Use one of the fold functionsto find the last element of a list, if any. Behave sensibly if the list is
+(* 3. Use one of the fold functions to find the last element of a list, if any. Behave sensibly if the list is
    empty. *)
 let either b a = match a with Some _ -> a | None -> Some b
 
@@ -163,3 +163,12 @@ let%test_unit _ =
     let open Benchmark in
     ignore (latency1 ~name:"fold_left length" 1000000L length list_basic);
     ignore (latency1 ~name:"List.length" 1000000L List.length list_basic);
+
+(* 9. Comment on wether the use of folds in each question 1 - 7 is good style *)
+(* 9.1. spend - Appropriate use *)
+(* 9.2. length - Except for List.length already existing this is appropriate use *)
+(* 9.3. last - Inapropriate, incurs complexity penalty of O(n) *)
+(* 9.4. reverse - Appropriate due to need for accumulator *)
+(* 9.5. mem - List.find might be more appropriate *)
+(* 9.6. concat_words - Inapropriate, due to repeated ^ being ineffecient *)
+(* 9.7. max_depth - Appropriate *)
