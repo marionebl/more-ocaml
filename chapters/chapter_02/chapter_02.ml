@@ -130,3 +130,22 @@ let%test_unit _ =
   let open Test_data in
   assert_equal [0; 2] (unleave (lseq 0) |> fst |> Fn.flip ltake 2) ~printer:(print_list ~f:Int.to_string);
   assert_equal [1; 3] (unleave (lseq 0) |> snd |> Fn.flip ltake 2) ~printer:(print_list ~f:Int.to_string)
+
+(* 6. Alphanumeric labels in documents go A, B, C ... X, Y, Z, AA, AB, ... BA, BB ... AAA ... Write
+   the lazy list containing strings representing this sequence. You may (mis)zse the Standard Library
+   function Char.escaped to convert a character to a string *)
+let rec label n = 
+  if n <= 25 then 
+    Char.chr (n + 65) |> Char.escaped
+  else 
+    label ((n / 26) - 1) ^ label (n mod 26)
+
+let alpha_labels = lseq 0 |> lmap label
+
+let%test_unit _ =
+  let open OUnit2 in
+  let open Base in
+  assert_equal "A" (lnth alpha_labels 0) ~printer:Fn.id;
+  assert_equal "B" (lnth alpha_labels 1) ~printer:Fn.id;
+  assert_equal "AA" (lnth alpha_labels 26) ~printer:Fn.id;
+  assert_equal "DCS" (lnth alpha_labels 2800) ~printer:Fn.id;
