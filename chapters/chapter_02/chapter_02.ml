@@ -110,3 +110,23 @@ let%test_unit _ =
 let fibonacci _ =
   let rec fibonacci' m n = Cons (m + n, fun () -> fibonacci' (if m + n = 0 then 1 else n) (m + n)) in
   fibonacci' 0 0
+
+(* 5. Write the function unleave which, given a lazy list, returns two lazy lists, one containing elements
+   at positions 0, 2, 4, 6 ... of the original list, and the other containing elements at positions 1, 3, 5, 7 ... *)
+let lfilteri f l = 
+  let rec lfilteri' f (Cons (h, tf)) i =
+    if f i h then
+      Cons (h, fun () -> lfilteri' f (tf ()) (i + 1))
+    else
+      lfilteri' f (tf ()) (i + 1)
+  in
+  lfilteri' f l 0
+
+let unleave l = (lfilteri (fun i _ -> i mod 2 = 0) l), (lfilteri (fun i _ -> i mod 2 <> 0) l)
+
+let%test_unit _ =
+  let open Base in
+  let open OUnit2 in
+  let open Test_data in
+  assert_equal [0; 2] (unleave (lseq 0) |> fst |> Fn.flip ltake 2) ~printer:(print_list ~f:Int.to_string);
+  assert_equal [1; 3] (unleave (lseq 0) |> snd |> Fn.flip ltake 2) ~printer:(print_list ~f:Int.to_string)
