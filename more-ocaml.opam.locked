@@ -12,6 +12,7 @@ depends: [
   "base-bytes" {= "base"}
   "base-threads" {= "base"}
   "base-unix" {= "base"}
+  "benchmark" {= "1.6"}
   "biniou" {= "1.2.1"}
   "cmdliner" {= "1.0.4"}
   "conf-m4" {= "1"}

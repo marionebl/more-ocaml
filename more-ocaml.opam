@@ -8,7 +8,7 @@ version: "0.1"
 synopsis: "Solutions for questions in More OCaml"
 depends: [
     "base" {= "v0.12.2"}
-    "benchmark" {= "1.6.0"}
+    "benchmark" {= "1.6"}
     "dune" {= "1.11.0"}
     "merlin" {= "3.3.2"}
     "ocaml" {>= "4.07.1"}
