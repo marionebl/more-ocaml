@@ -1,3 +1,5 @@
+(* Chapter 2 - Being Lazy. Page 9 - 14 *)
+
 (* We can make our own data type for OCaml's built-in lists like this *)
 type 'a list = Nil | Cons of 'a * 'a list
 

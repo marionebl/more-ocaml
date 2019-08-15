@@ -1,3 +1,4 @@
+(* Chapter 1 - Unravelling "Fold". Page 1 - 7 *)
 open Types
 
 (* The List module in Ocaml's Standard Library defines two intriguingly-named functions over lists: *)
