@@ -1,0 +1,7 @@
+(library
+  (name Test_data)
+  (libraries base Types))
+
+(env
+  (dev
+    (flags (:standard -warn-error -A))))

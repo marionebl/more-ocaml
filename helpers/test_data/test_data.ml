@@ -30,3 +30,5 @@ let (>>) fa fb a = fa a |> fb
 let print_list ~f = 
     let open Base in
     List.map ~f >> String.concat ~sep:"; " >> Printf.sprintf "[%s]"
+
+let print_int_list = print_list ~f:string_of_int
