@@ -108,5 +108,30 @@ module Questions = struct
     (* 4. Define a record of six items a ... f where a and b have the same type as one another, c and d have the
        same type as one another and c and f have the same type as one another *)
     type ('a, 'b, 'c) t = { a: 'a; b: 'a; c: 'b; d: 'b; e: 'c; f: 'c }
+
+    (* 5. Records are used in the module Gc which controls OCaml's garbage collector (a garbage collector
+       is a system which automatically reclaims space the program has finished with as the program is
+       running). Use the data structures and functions in the Gc module to write a programs which: 
+       (a) write a summary of the state of the garbage collector to console; and 
+       (b) alter the verbosity of the garbage collector as defined in the control record *)
+    let gc_summary () =
+        let ws = Sys.word_size |> float_of_int in
+        let to_kb b = ws *. b /. 1000. |> int_of_float in
+        let stat = Gc.stat ( ) in
+        let mw = Gc.minor_words () in
+        let miwlen = (mw |> to_kb |> string_of_int |> String.length) in
+        let mawlen = (stat.major_words |> to_kb |> string_of_int |> String.length) in
+        let promlen = (stat.promoted_words |> to_kb |> string_of_int |> String.length) in
+        let totallen = (mw +. stat.major_words -. stat.promoted_words |> to_kb |> string_of_int |> String.length) in
+        let len = (max promlen (max totallen (max miwlen mawlen))) + 1 in
+        Printf.printf "minor heap: +%s%i kB\n" (List.init (len - miwlen) (fun _ -> " ") |> Base.String.concat ~sep: "") (mw |> to_kb);
+        Printf.printf "major heap: +%s%i kB\n" (List.init (len - mawlen) (fun _ -> " ") |> Base.String.concat ~sep: "") (stat.major_words |> to_kb);
+        if stat.promoted_words > 0. then begin 
+            Printf.printf "promoted: -%s%i kB\n" (List.init (len - promlen) (fun _ -> " ") |> Base.String.concat ~sep: "") (stat.promoted_words |> to_kb) 
+        end;
+        Printf.printf "%s\n" (List.init (len + 16) (fun _ -> "─") |> Base.String.concat ~sep: "");
+        Printf.printf "total:       %s%i kB" (List.init (len - totallen) (fun _ -> " ") |> Base.String.concat ~sep: "") (mw +. stat.major_words -. stat.promoted_words |> to_kb)
+    let () =
+        gc_summary ()
 end
 
