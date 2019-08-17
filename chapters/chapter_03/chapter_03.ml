@@ -104,5 +104,9 @@ module Questions = struct
         assert_equal !(ref_field_a.x) !(ref_field_b.x) ~printer:Int.to_string; 
         assert_equal !(ref_field_b.x) !ref_x ~printer:Int.to_string;
         assert_equal 2 !ref_x ~printer:Int.to_string;
+
+    (* 4. Define a record of six items a ... f where a and b have the same type as one another, c and d have the
+       same type as one another and c and f have the same type as one another *)
+    type ('a, 'b, 'c) t = { a: 'a; b: 'a; c: 'b; d: 'b; e: 'c; f: 'c }
 end
 
