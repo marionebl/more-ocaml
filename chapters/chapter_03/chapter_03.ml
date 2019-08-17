@@ -82,5 +82,27 @@ module Questions = struct
         let open OUnit2 in
         let open Base in
         assert_equal "It is 20:53 on Friday, 16. August 2019" (announce (Some 1565988780.)) ~printer:Fn.id
+
+    (* 3. What is the difference between type t = { x: int ref } and type t = { mutable x: int }? What
+       are the advantages and disadvantages of each *)
+    type t_ref_field = { x: int ref }
+    type t_mutable_field = { mutable x: int }
+
+    let mk_ref_field (x: int ref): t_ref_field = { x }
+    let mk_mut_field (x: int): t_mutable_field = { x }
+
+    let%test_unit _ =
+        let open OUnit2 in
+        let open Base in
+        let ref_x = ref 0 in
+        let ref_field_a = mk_ref_field ref_x in
+        let ref_field_b = mk_ref_field ref_x in
+        let mutable_field = mk_mut_field 0 in
+        ref_field_a.x := (!(ref_field_a.x) + 1);
+        ref_field_b.x := (!(ref_field_b.x) + 1);
+        mutable_field.x <- 1;
+        assert_equal !(ref_field_a.x) !(ref_field_b.x) ~printer:Int.to_string; 
+        assert_equal !(ref_field_b.x) !ref_x ~printer:Int.to_string;
+        assert_equal 2 !ref_x ~printer:Int.to_string;
 end
 
