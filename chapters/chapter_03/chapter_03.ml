@@ -130,8 +130,46 @@ module Questions = struct
             Printf.printf "promoted: -%s%i kB\n" (List.init (len - promlen) (fun _ -> " ") |> Base.String.concat ~sep: "") (stat.promoted_words |> to_kb) 
         end;
         Printf.printf "%s\n" (List.init (len + 16) (fun _ -> "─") |> Base.String.concat ~sep: "");
-        Printf.printf "total:       %s%i kB" (List.init (len - totallen) (fun _ -> " ") |> Base.String.concat ~sep: "") (mw +. stat.major_words -. stat.promoted_words |> to_kb)
-    let () =
-        gc_summary ()
+        Printf.printf "total:       %s%i kB\n" (List.init (len - totallen) (fun _ -> " ") |> Base.String.concat ~sep: "") (mw +. stat.major_words -. stat.promoted_words |> to_kb)
+
+    type verbosity =
+        | Major
+        | Minor
+        | HeapResize
+        | StackResize
+        | HeapCompaction
+        | ParameterChange
+        | SliceSizeComputation
+        | LibrarySearch
+        | CompactionComputation
+        | Exit
+
+    let verbosity_of_string = function
+        | "Major" -> Major
+        | "Minor" -> Minor
+        | "HeapResize" -> HeapResize
+        | "StackResize" -> StackResize
+        | "HeapCompaction" -> HeapCompaction
+        | "ParameterChange" -> ParameterChange
+        | "SliceSizeComputation" -> SliceSizeComputation
+        | "LibrarySearch" -> LibrarySearch
+        | "CompactionComputation" -> CompactionComputation
+        | "Exit" -> Exit
+        | _ -> failwith "Unknown verbosity"
+
+    let verbosity_value = function
+        | Major -> 0x001
+        | Minor -> 0x002
+        | HeapResize -> 0x004
+        | StackResize -> 0x008
+        | HeapCompaction -> 0x010
+        | ParameterChange -> 0x020
+        | SliceSizeComputation -> 0x040
+        | LibrarySearch -> 0x080
+        | CompactionComputation -> 0x200
+        | Exit -> 0x400
+
+    let gc_verbosity verbosity = 
+        Gc.set { (Gc.get ()) with verbose=(verbosity_of_string verbosity |> verbosity_value) }
 end
 

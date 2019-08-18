@@ -1,8 +1,14 @@
 (library
   (name chapter_03)
+  (modules chapter_03)
   (inline_tests)
   (preprocess (pps ppx_inline_test))
   (libraries base oUnit benchmark))
+
+(executable
+ (name gc)
+ (modules gc)
+ (libraries chapter_03))
 
 (env
   (dev
