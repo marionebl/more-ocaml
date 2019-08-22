@@ -24,7 +24,7 @@ code-insiders .
 dune runtest -w
 ```
 
-<details open>
+<details>
 <summary>
     Manual Setup
 </summary>
