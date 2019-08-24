@@ -87,6 +87,7 @@ module Words = struct
     read_words' []
 end
 
+
 module Output = struct
   (* For a generic output [...] we must have an output_char function to write a single character,
      at least. It is also useful to have an out_channel_length function so we know how many characters
@@ -105,10 +106,10 @@ module Output = struct
     let pos = ref 0 in
     {
       output_char = (fun c -> 
-        if !pos < Bytes.length b
+          if !pos < Bytes.length b
           then (Bytes.set b !pos c; pos := !pos + 1)
           else raise End_of_file
-      );
+        );
       out_channel_length = (fun () -> Bytes.length b)
     }
 end
@@ -116,10 +117,10 @@ end
 let output_int_list (o: Output.t) (ls: int list): unit = 
   o.output_char '[';
   List.iteri (fun i n -> 
-    String.iter o.output_char (string_of_int n);
-    o.output_char ';';
-    if List.length ls - 1 <> i then o.output_char ' ';
-  ) ls;
+      String.iter o.output_char (string_of_int n);
+      o.output_char ';';
+      if List.length ls - 1 <> i then o.output_char ' ';
+    ) ls;
   o.output_char ']'
 
 let%test_unit _ =
@@ -130,3 +131,34 @@ let%test_unit _ =
   let output = (Output.of_bytes io) in
   output_int_list output [1; 2; 3; 4; 5];
   assert_equal expected (Bytes.to_string io) ~printer:Fn.id
+
+module Solutions = struct
+  (* 1. Write a function to build an input from an array of characters *)
+  let input_of_array (a: char array): Input.t =
+    let pos = ref 0 in
+    {
+      pos_in = (fun () -> !pos);
+      seek_in = (fun p -> pos := p);
+      input_char = (fun () -> 
+          if !pos >= Array.length a - 1 then
+            raise End_of_file
+          else
+            let c = a.(!pos) in
+            pos := !pos + 1;
+            c
+        );
+      in_channel_length = Array.length a
+    }
+
+  let%test_unit _ =
+    let open OUnit2 in
+    let open Base in
+    let input = input_of_array [|'a'; 'b'; 'c'; 'd'; 'e'|] in
+    assert_equal (input.pos_in ()) 0 ~printer:Int.to_string;
+    assert_equal input.in_channel_length 5 ~printer:Int.to_string;
+
+    input.seek_in 1;
+    assert_equal (input.pos_in ()) 1 ~printer:Int.to_string;
+    assert_equal (input.input_char ()) 'b' ~printer:Char.escaped;
+    assert_equal (input.pos_in ()) 2 ~printer:Int.to_string;
+end
