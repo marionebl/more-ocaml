@@ -160,5 +160,27 @@ module Solutions = struct
     input.seek_in 1;
     assert_equal (input.pos_in ()) 1 ~printer:Int.to_string;
     assert_equal (input.input_char ()) 'b' ~printer:Char.escaped;
-    assert_equal (input.pos_in ()) 2 ~printer:Int.to_string;
+    assert_equal (input.pos_in ()) 2 ~printer:Int.to_string
+
+  (* 2. Write a function input_string of type input -> int -> string which returns the given
+     number of characters from the input as string or fewer if the input has ended *)
+  let input_string (i: Input.t) (n: int): string =
+    let rec input_string' (b: Bytes.t) (n: int): Bytes.t =
+      if n = 0 then b
+      else try 
+        (Bytes.set b (Bytes.length b - n) (i.input_char ()));
+        input_string' b (n - 1)
+      with End_of_file -> b
+    in
+    let result = input_string' (Bytes.create n) n in 
+    Input.rewind i;
+    result |> Bytes.to_string
+
+  let%test_unit _ =
+    let open OUnit2 in
+    let open Base in
+    let alphabet = "abcdefghijklmnopqrstuvwxyz" in
+    let input = Input.of_string alphabet in
+    assert_equal "a" (input_string input 1) ~printer:Fn.id;
+    assert_equal alphabet (input_string input (String.length alphabet)) ~printer:Fn.id;
 end
