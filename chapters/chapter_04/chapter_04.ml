@@ -227,21 +227,63 @@ module Solutions = struct
         in_channel_length = String.length s
       }
 
-    let times n fn a = 
-      let rec times' n l =
-        if n = 0 then l
-        else times' (n - 1) (fn a :: l)
-      in
-      times' n []
-
     let%test_unit _ =
       let open OUnit2 in
+      let open Test_data in
       let open Base in
       let alphabet = "abcdefghijklmnopqrstuvwxyz" in
       let { input_char_opt; _ } = of_string alphabet in
       assert_equal (Some 'a') (input_char_opt ());
       let last = times (String.length alphabet - 1) input_char_opt () |> List.hd_exn in
       assert_equal (Some 'z') last
+  end
+
+  (* 4.Extend the input type with a function input_byte which returns an integer representing the next byte,
+     or the special value -1 at the end of a file. Comment on the usefulness of this compared with 
+     input_char_opt and input_char *)
+  module ByteInput = struct
+    type t = {
+      pos_in: unit -> int;
+      seek_in: int -> unit;
+      input_char: unit -> char;
+      input_byte: unit -> int;
+      in_channel_length: int
+    }
+
+  let of_string (s: string): t =
+    let pos = ref 0 in
+    {
+      pos_in = (fun () -> !pos);
+      seek_in = (fun p -> 
+          if p < 0 then
+            raise (Invalid_argument "seek_in before beginning");
+          pos := p
+        );
+      input_char = (fun () -> 
+          if !pos > String.length s - 1 then
+            raise End_of_file
+          else 
+            let c = s.[!pos] in 
+            pos := !pos + 1;
+            c
+        );
+      input_byte = (fun () -> 
+        if !pos > String.length s - 1 then -1
+        else
+          let n = !pos + 1 in
+          pos := n;
+          n
+        );
+      in_channel_length = String.length s
+    }
+
+    let%test_unit _ =
+      let open OUnit2 in
+      let open Test_data in
+      let alphabet = "abcdefghijklmnopqrstuvwxyz" in
+      let { input_byte; _ } = of_string alphabet in
+      let len = String.length alphabet in
+      assert_equal (List.init len (fun i -> i + 1)) (times len input_byte () |> List.rev) ~printer:print_int_list
   end
 
   (* 5. Write an input type which raises End_of_file if it reaches a new line (a '\n' character). Use this

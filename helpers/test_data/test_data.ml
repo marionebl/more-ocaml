@@ -32,3 +32,10 @@ let print_list ~f =
     List.map ~f >> String.concat ~sep:"; " >> Printf.sprintf "[%s]"
 
 let print_int_list = print_list ~f:string_of_int
+
+let times n fn a = 
+  let rec times' n l =
+    if n = 0 then l
+    else times' (n - 1) (fn a :: l)
+  in
+  times' n []

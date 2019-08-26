@@ -2,7 +2,7 @@
   (name chapter_04)
   (inline_tests)
   (preprocess (pps ppx_inline_test))
-  (libraries base oUnit benchmark))
+  (libraries base oUnit benchmark Test_data))
 
 (env
   (dev
