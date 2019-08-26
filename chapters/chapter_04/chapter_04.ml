@@ -243,4 +243,60 @@ module Solutions = struct
       let last = times (String.length alphabet - 1) input_char_opt () |> List.hd_exn in
       assert_equal (Some 'z') last
   end
+
+  (* 5. Write an input type which raises End_of_file if it reaches a new line (a '\n' character). Use this
+     to build a program which reads a line from standard input. *)
+  module LineInput = struct
+    type t = {
+      pos_in: unit -> int;
+      seek_in: int -> unit;
+      input_char: unit -> char;
+      in_channel_length: int
+    }
+
+    let of_channel (ch: in_channel): t = {
+      pos_in = (fun () -> pos_in ch);
+      seek_in = seek_in ch;
+      input_char = (fun () -> 
+        let c = input_char ch in
+        if c = '\n' then raise End_of_file else c
+      );
+      in_channel_length = in_channel_length ch
+    }
+
+  let of_string (s: string): t =
+    let pos = ref 0 in
+    {
+      pos_in = (fun () -> !pos);
+      seek_in = (fun p -> 
+          if p < 0 then
+            raise (Invalid_argument "seek_in before beginning");
+          pos := p
+        );
+      input_char = (fun () -> 
+          if !pos > String.length s - 1 then
+            raise End_of_file
+          else 
+            let c = s.[!pos] in 
+            if c = '\n' then raise End_of_file;
+            pos := !pos + 1;
+            c
+        );
+      in_channel_length = String.length s
+    }
+
+    let readline (i: t): string = 
+      let rec readline' (b: Buffer.t): Buffer.t =
+        try Buffer.add_char b (i.input_char ()); readline' b 
+        with End_of_file -> b
+      in
+      readline' (Buffer.create 0) |> Buffer.contents
+
+    let%test_unit _ =
+      let open OUnit2 in
+      let open Base in
+      let alphabet = "abc\ndef\nghi\njklmnopqrstuvwxyz" in
+      let i = of_string alphabet in
+      assert_equal "abc" (readline i) ~printer:Fn.id;
+  end
 end
