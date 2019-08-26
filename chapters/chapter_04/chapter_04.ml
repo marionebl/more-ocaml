@@ -168,9 +168,9 @@ module Solutions = struct
     let rec input_string' (b: Bytes.t) (n: int): Bytes.t =
       if n = 0 then b
       else try 
-        (Bytes.set b (Bytes.length b - n) (i.input_char ()));
-        input_string' b (n - 1)
-      with End_of_file -> b
+          (Bytes.set b (Bytes.length b - n) (i.input_char ()));
+          input_string' b (n - 1)
+        with End_of_file -> b
     in
     let result = input_string' (Bytes.create n) n in 
     Input.rewind i;
@@ -183,4 +183,64 @@ module Solutions = struct
     let input = Input.of_string alphabet in
     assert_equal "a" (input_string input 1) ~printer:Fn.id;
     assert_equal alphabet (input_string input (String.length alphabet)) ~printer:Fn.id;
+
+  (* 3. Extend the input type to include a function input_char_opt which returns a value of type char option,
+     with None signalling end of file. Extend the functions input_of_channel and input_of_string appropriately. *)
+  module InputOpt = struct
+    type t = {
+      pos_in: unit -> int;
+      seek_in: int -> unit;
+      input_char: unit -> char;
+      input_char_opt: unit -> char option;
+      in_channel_length: int
+    }
+
+    (* Now we can build an input from an OCaml in_channel easily *)
+    let of_channel (ch: in_channel): t = {
+      pos_in = (fun () -> pos_in ch);
+      seek_in = seek_in ch;
+      input_char = (fun () -> input_char ch);
+      input_char_opt = (fun () -> try Some (input_char ch) with End_of_file -> None);
+      in_channel_length = in_channel_length ch
+    }
+
+    (* Let us assure ourselves that this structure also works fro abstracting over strings *)
+    let of_string (s: string): t =
+      let pos = ref 0 in
+      let in_char = (fun () -> 
+          if !pos > String.length s - 1 then
+            raise End_of_file
+          else 
+            let c = s.[!pos] in 
+            pos := !pos + 1;
+            c
+        ) in
+      {
+        pos_in = (fun () -> !pos);
+        seek_in = (fun p -> 
+            if p < 0 then
+              raise (Invalid_argument "seek_in before beginning");
+            pos := p
+          );
+        input_char = in_char;
+        input_char_opt = (fun () -> try Some (in_char ()) with End_of_file -> None);
+        in_channel_length = String.length s
+      }
+
+    let times n fn a = 
+      let rec times' n l =
+        if n = 0 then l
+        else times' (n - 1) (fn a :: l)
+      in
+      times' n []
+
+    let%test_unit _ =
+      let open OUnit2 in
+      let open Base in
+      let alphabet = "abcdefghijklmnopqrstuvwxyz" in
+      let { input_char_opt; _ } = of_string alphabet in
+      assert_equal (Some 'a') (input_char_opt ());
+      let last = times (String.length alphabet - 1) input_char_opt () |> List.hd_exn in
+      assert_equal (Some 'z') last
+  end
 end
