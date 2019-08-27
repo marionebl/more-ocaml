@@ -89,7 +89,7 @@ end
 
 
 module Output = struct
-  (* For a generic output [...] we must have an output_char function to write a single character,
+  (* For a generic  [...] we must have an output_char function to write a single character,
      at least. It is also useful to have an out_channel_length function so we know how many characters
      have been written. *)
   type t = {
@@ -184,8 +184,8 @@ module Solutions = struct
     assert_equal "a" (input_string input 1) ~printer:Fn.id;
     assert_equal alphabet (input_string input (String.length alphabet)) ~printer:Fn.id;
 
-  (* 3. Extend the input type to include a function input_char_opt which returns a value of type char option,
-     with None signalling end of file. Extend the functions input_of_channel and input_of_string appropriately. *)
+    (* 3. Extend the input type to include a function input_char_opt which returns a value of type char option,
+       with None signalling end of file. Extend the functions input_of_channel and input_of_string appropriately. *)
   module InputOpt = struct
     type t = {
       pos_in: unit -> int;
@@ -250,32 +250,32 @@ module Solutions = struct
       in_channel_length: int
     }
 
-  let of_string (s: string): t =
-    let pos = ref 0 in
-    {
-      pos_in = (fun () -> !pos);
-      seek_in = (fun p -> 
-          if p < 0 then
-            raise (Invalid_argument "seek_in before beginning");
-          pos := p
-        );
-      input_char = (fun () -> 
-          if !pos > String.length s - 1 then
-            raise End_of_file
-          else 
-            let c = s.[!pos] in 
-            pos := !pos + 1;
-            c
-        );
-      input_byte = (fun () -> 
-        if !pos > String.length s - 1 then -1
-        else
-          let n = !pos + 1 in
-          pos := n;
-          n
-        );
-      in_channel_length = String.length s
-    }
+    let of_string (s: string): t =
+      let pos = ref 0 in
+      {
+        pos_in = (fun () -> !pos);
+        seek_in = (fun p -> 
+            if p < 0 then
+              raise (Invalid_argument "seek_in before beginning");
+            pos := p
+          );
+        input_char = (fun () -> 
+            if !pos > String.length s - 1 then
+              raise End_of_file
+            else 
+              let c = s.[!pos] in 
+              pos := !pos + 1;
+              c
+          );
+        input_byte = (fun () -> 
+            if !pos > String.length s - 1 then -1
+            else
+              let n = !pos + 1 in
+              pos := n;
+              n
+          );
+        in_channel_length = String.length s
+      }
 
     let%test_unit _ =
       let open OUnit2 in
@@ -300,32 +300,32 @@ module Solutions = struct
       pos_in = (fun () -> pos_in ch);
       seek_in = seek_in ch;
       input_char = (fun () -> 
-        let c = input_char ch in
-        if c = '\n' then raise End_of_file else c
-      );
+          let c = input_char ch in
+          if c = '\n' then raise End_of_file else c
+        );
       in_channel_length = in_channel_length ch
     }
 
-  let of_string (s: string): t =
-    let pos = ref 0 in
-    {
-      pos_in = (fun () -> !pos);
-      seek_in = (fun p -> 
-          if p < 0 then
-            raise (Invalid_argument "seek_in before beginning");
-          pos := p
-        );
-      input_char = (fun () -> 
-          if !pos > String.length s - 1 then
-            raise End_of_file
-          else 
-            let c = s.[!pos] in 
-            if c = '\n' then raise End_of_file;
-            pos := !pos + 1;
-            c
-        );
-      in_channel_length = String.length s
-    }
+    let of_string (s: string): t =
+      let pos = ref 0 in
+      {
+        pos_in = (fun () -> !pos);
+        seek_in = (fun p -> 
+            if p < 0 then
+              raise (Invalid_argument "seek_in before beginning");
+            pos := p
+          );
+        input_char = (fun () -> 
+            if !pos > String.length s - 1 then
+              raise End_of_file
+            else 
+              let c = s.[!pos] in 
+              if c = '\n' then raise End_of_file;
+              pos := !pos + 1;
+              c
+          );
+        in_channel_length = String.length s
+      }
 
     let readline (i: t): string = 
       let rec readline' (b: Buffer.t): Buffer.t =
@@ -341,4 +341,21 @@ module Solutions = struct
       let i = of_string alphabet in
       assert_equal "abc" (readline i) ~printer:Fn.id;
   end
+
+  (* 6. Write a function to build an output from a Buffer.t. Show how this can be used to retrieve a final
+     string after output is finished *)
+  let output_of_buffer (b: Buffer.t): Output.t = {
+    output_char = Buffer.add_char b;
+    out_channel_length = (fun () -> Buffer.length b)
+  }
+
+  let%test_unit _ =
+    let open OUnit2 in
+    let open Base in
+    let b = Buffer.create 0 in
+    let o = output_of_buffer b in
+    o.output_char 'a';
+    o.output_char 'b';
+    o.output_char 'c';
+    assert_equal "abc" (Buffer.contents b) ~printer:Fn.id
 end
