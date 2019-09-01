@@ -201,3 +201,58 @@ let%test_unit _ =
   let bput_fast = putval_fast b in
   ignore (latency1 ~name:"putval" 1000000000L bput 1);
   ignore (latency1 ~name:"putval_fast" 1000000000L bput_fast 1)
+
+(* 4. Write the function putval_32 which can put a value of type Int32.t in the same fashion as putval *)
+let rec putbit_32 (o: output_bits) (b: Int32.t) =
+  if o.obit = (-1) then 
+    begin
+      flush o;
+      putbit_32 o b 
+    end
+  else 
+    begin
+      if b <> 0l then o.obyte <- o.obyte lor (1 lsl o.obit);
+      o.obit <- o.obit - 1
+    end
+
+let putval_32 (o: output_bits) (v: Int32.t) (l: int): unit =
+  for x = l - 1 downto 0 do
+    putbit_32 o (Int32.logand v (Int32.shift_left 1l x))
+  done
+
+(* 6. We said that the output_bits type needed a flush operation. In fact, this is not always true - for
+   outputs built with, for example, output_of_bytes, we could write the current byte every time a bit is
+   written, seeking back one byte each time, only moving on when the byte is actually finished. Implement this. *)
+type rewindable_output = {
+  output_char : char -> unit;
+  out_channel_length : unit -> int;
+  rewind : unit -> unit;
+}
+
+let rewindable_output_of_bytes (b: Bytes.t): rewindable_output = 
+  let pos = ref 0 in
+  {
+    output_char = (fun c -> 
+        if !pos < Bytes.length b
+        then (Bytes.set b !pos c; pos := !pos + 1)
+        else raise End_of_file
+      );
+    out_channel_length = (fun () -> Bytes.length b);
+    rewind = (fun () -> if !pos > 0 then pos := !pos - 1 else raise (Failure "rewind"))
+  }
+
+type rewindable_output_bits = {
+  output : rewindable_output;
+  mutable obyte : int;
+  mutable obit : int
+}
+
+let rec putbit (o: rewindable_output_bits) (b: int): unit =
+  if o.obit = (-1) then putbit o b 
+  else 
+    begin
+      if b <> 0 then o.obyte <- o.obyte lor (1 lsl o.obit);
+      o.output.output_char (char_of_int o.obyte);
+      o.output.rewind ();
+      o.obit <- o.obit - 1
+    end
