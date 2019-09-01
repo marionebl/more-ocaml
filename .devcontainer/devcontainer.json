@@ -1,9 +1,9 @@
 {
-    "name": "ocaml",
-    "dockerFile": "../Dockerfile",
+    "name": "more-ocaml",
+    "image": "marionebl/more-ocaml",
     "extensions": [
-        "jaredly.reason-vscode",
         "maelvalais.dune",
+        "hackwaly.ocaml",
         "hackwaly.ocaml-debugger",
         "editorconfig.editorconfig",
         "ms-azuretools.vscode-docker"

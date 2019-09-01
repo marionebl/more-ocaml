@@ -17,9 +17,11 @@ RUN rm more-ocaml.opam more-ocaml.opam.locked
 
 RUN sudo apt-get install fswatch -y
 
+USER root
 SHELL ["/bin/bash", "--login" , "-c"]
-ENV OPAM_SWITCH_PREFIX='/root/.opam/4.07.1'
-ENV CAML_LD_LIBRARY_PATH='/root/.opam/4.07.1/lib/stublibs:/root/.opam/4.07.1/lib/ocaml/stublibs:/root/.opam/4.07.1/lib/ocaml'
-ENV OCAML_TOPLEVEL_PATH='/root/.opam/4.07.1/lib/toplevel'
-ENV MANPATH=':/root/.opam/4.07.1/man'
-ENV PATH='/root/.opam/4.07.1/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+RUN ln -s "/home/opam/.opam" "/root/.opam"
+ENV OPAM_SWITCH_PREFIX='/root/.opam/4.07'
+ENV CAML_LD_LIBRARY_PATH='/root/.opam/4.07/lib/stublibs:/root/.opam/4.07/lib/ocaml/stublibs:/root/.opam/4.07/lib/ocaml'
+ENV OCAML_TOPLEVEL_PATH='/root/.opam/4.07/lib/toplevel'
+ENV MANPATH=':/root/.opam/4.07/man'
+ENV PATH='/root/.opam/4.07/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
