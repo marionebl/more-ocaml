@@ -174,3 +174,30 @@ let%test_unit _ =
   assert_equal (getval_fast b 8) (getval b 8) ~printer:string_of_int;
   ignore (latency1 ~name:"getval" 1000000000L getval (c ()));
   ignore (latency1 ~name:"getval_fast" 1000000000L getval_fast (c ()))
+
+(* 2. Write the function getval_32 which can get a value of type Int32.t in the same fashion as getval. *)
+let getval_32 (b: input_bits) (n: int): Int32.t =
+  if n <= 0 || n > 31 then
+    raise (Invalid_argument "getval")
+  else 
+    let r = ref 0l in
+    for x = n - 1 downto 0 do
+      r := Int32.logor !r (Int32.shift_left (if getbit b then 1l else 0l) x)
+    done; 
+    !r
+
+(* 3. Specialize the function putval so that writing 8 bits at a time when the output is aligned is optimized.
+   Benchmark this function against the naive one. *)
+let putval_fast (o: output_bits) (v: int) (l: int): unit =
+    if o.obit = 7 && l = 8 
+    then char_of_int v |> o.output.output_char
+    else putval o v l
+
+let%test_unit _ =
+  let open Benchmark in
+  let o = output_of_bytes (Bytes.create 1000000000) in
+  let b = output_bits_of_output o in
+  let bput = putval b in
+  let bput_fast = putval_fast b in
+  ignore (latency1 ~name:"putval" 1000000000L bput 1);
+  ignore (latency1 ~name:"putval_fast" 1000000000L bput_fast 1)
