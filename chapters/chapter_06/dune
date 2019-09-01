@@ -1,0 +1,9 @@
+(library
+  (name chapter_06)
+  (inline_tests)
+  (preprocess (pps ppx_inline_test))
+  (libraries base oUnit benchmark Test_data chapter_04))
+
+(env
+  (dev
+    (flags (:standard -warn-error -A))))
